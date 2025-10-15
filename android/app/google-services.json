@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "472035298713",
+    "project_id": "c-r-m-responsive-app-ysv0m2",
+    "storage_bucket": "c-r-m-responsive-app-ysv0m2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472035298713:android:c91fd78a3df46a6ce49708",
+        "android_client_info": {
+          "package_name": "com.mycompany.crmapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "472035298713-vkp2spjkgms44og67u359ios3ivivmgj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5lqa4g5YLmcrQ3DuMyBwP8Zk6bXwSdHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "472035298713-vkp2spjkgms44og67u359ios3ivivmgj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "472035298713-uimebdhqsnq7lcld5j7t0srdl57vnm2l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.crmapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
