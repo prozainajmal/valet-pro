@@ -254,7 +254,7 @@ class _CheckoutManagementWidgetState extends State<CheckoutManagementWidget>
                               ),
                               alignment: AlignmentDirectional(-1.0, 0.0),
                               child: Row(
-                                mainAxisSize: MainAxisSize.max,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Expanded(
                                     flex: 7,
@@ -265,6 +265,7 @@ class _CheckoutManagementWidgetState extends State<CheckoutManagementWidget>
                                         FFLocalizations.of(context).getText(
                                           'ayjev5y5' /* Checkout Management */,
                                         ),
+                                        overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.start,
                                         style: FlutterFlowTheme.of(context)
                                             .displaySmall
@@ -1119,9 +1120,7 @@ class _CheckoutManagementWidgetState extends State<CheckoutManagementWidget>
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                              _model
-                                                                  .serviceNameTextController
-                                                                  .text,
+                                                              listViewServicecolRecord.servicename,
                                                               style: FlutterFlowTheme
                                                                       .of(context)
                                                                   .bodyLarge
@@ -1137,9 +1136,7 @@ class _CheckoutManagementWidgetState extends State<CheckoutManagementWidget>
                                                                   ),
                                                             ),
                                                             Text(
-                                                              _model
-                                                                  .servicePrizeTextController
-                                                                  .text,
+                                                                listViewServicecolRecord.jd.toString() ?? "",
                                                               style: FlutterFlowTheme
                                                                       .of(context)
                                                                   .labelMedium
@@ -1149,7 +1146,7 @@ class _CheckoutManagementWidgetState extends State<CheckoutManagementWidget>
                                                                             .labelMediumFamily,
                                                                     color: FlutterFlowTheme.of(
                                                                             context)
-                                                                        .primaryBtnText,
+                                                                        .gray600,
                                                                     letterSpacing:
                                                                         0.0,
                                                                     useGoogleFonts:
@@ -1169,9 +1166,7 @@ class _CheckoutManagementWidgetState extends State<CheckoutManagementWidget>
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                              _model
-                                                                  .serviceDescriptionTextController
-                                                                  .text,
+                                                              listViewServicecolRecord.serviceDesc.toString() ?? "",
                                                               style: FlutterFlowTheme
                                                                       .of(context)
                                                                   .labelMedium
