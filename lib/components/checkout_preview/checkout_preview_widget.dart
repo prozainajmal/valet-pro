@@ -45,6 +45,12 @@ class CheckoutPreviewWidget extends StatefulWidget {
 
 class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
   late CheckoutPreviewModel _model;
+  
+  // Add state variables for services selection and total calculation
+  List<String> selectedServices = [];
+  double totalAmount = 0.0;
+  double baseAmount = 2.5; // Base tip amount
+  double customTipAmount = 0.0;
 
   @override
   void setState(VoidCallback callback) {
@@ -68,6 +74,9 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
 
     _model.textController4 ??= TextEditingController();
     _model.textFieldFocusNode4 ??= FocusNode();
+    
+    // Initialize total amount with base tip
+    totalAmount = baseAmount;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -77,6 +86,64 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
     _model.maybeDispose();
 
     super.dispose();
+  }
+  
+  // Method to calculate total amount
+  void calculateTotal() {
+    double tipAmount = 0.0;
+    
+    // Calculate tip amount based on radio button selection
+    if (_model.radioButtonValue == '2.5 JD') {
+      tipAmount = baseAmount;
+    } else if (_model.radioButtonValue == 'Custom Amount') {
+      // Parse custom tip amount from text field
+      String customTipText = _model.textController4.text;
+      if (customTipText.isNotEmpty) {
+        double customAmount = double.tryParse(customTipText) ?? 0.0;
+        
+        // Validate custom tip amount
+        if (customAmount <= 2.5) {
+          // Show error toast
+          showSnackbar(
+            context,
+            'Custom tip must be greater than 2.5 JD',
+          );
+          return; // Don't update total if validation fails
+        }
+        
+        tipAmount = customAmount;
+      }
+    }
+    
+    // Update total amount (services total will be calculated when services are selected)
+    totalAmount = tipAmount;
+  }
+  
+  // Method to add service to total
+  void addServiceToTotal(double servicePrice) {
+    setState(() {
+      totalAmount += servicePrice;
+    });
+  }
+  
+  // Method to remove service from total
+  void removeServiceFromTotal(double servicePrice) {
+    setState(() {
+      totalAmount -= servicePrice;
+    });
+  }
+  
+  // Method to toggle service selection
+  void toggleService(String serviceId, double servicePrice) {
+    setState(() {
+      if (selectedServices.contains(serviceId)) {
+        selectedServices.remove(serviceId);
+        removeServiceFromTotal(servicePrice);
+      } else {
+        selectedServices.add(serviceId);
+        addServiceToTotal(servicePrice);
+      }
+    });
   }
 
   @override
@@ -157,17 +224,46 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        FFLocalizations.of(context).getText(
-                          'n6s5jqjj' /* Customer Information */,
-                        ),
-                        style: FlutterFlowTheme.of(context).labelLarge.override(
-                              fontFamily:
-                                  FlutterFlowTheme.of(context).labelLargeFamily,
-                              letterSpacing: 0.0,
-                              useGoogleFonts: !FlutterFlowTheme.of(context)
-                                  .labelLargeIsCustom,
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Text(
+                            FFLocalizations.of(context).getText(
+                              'n6s5jqjj' /* Customer Information */,
                             ),
+                            style: FlutterFlowTheme.of(context).labelLarge.override(
+                                  fontFamily:
+                                      FlutterFlowTheme.of(context).labelLargeFamily,
+                                  letterSpacing: 0.0,
+                                  useGoogleFonts: !FlutterFlowTheme.of(context)
+                                      .labelLargeIsCustom,
+                                ),
+                          ),
+                          Text(
+                            ' *',
+                            style: FlutterFlowTheme.of(context).labelLarge.override(
+                                  fontFamily:
+                                      FlutterFlowTheme.of(context).labelLargeFamily,
+                                  color: Colors.red,
+                                  letterSpacing: 0.0,
+                                  useGoogleFonts: !FlutterFlowTheme.of(context)
+                                      .labelLargeIsCustom,
+                                ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              ' (All fields required)',
+                              style: FlutterFlowTheme.of(context).labelSmall.override(
+                                    fontFamily:
+                                        FlutterFlowTheme.of(context).labelSmallFamily,
+                                    color: Colors.red,
+                                    letterSpacing: 0.0,
+                                    useGoogleFonts: !FlutterFlowTheme.of(context)
+                                        .labelSmallIsCustom,
+                                  ),
+                            ),
+                          ),
+                        ].divide(SizedBox(width: 4.0)),
                       ),
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -480,7 +576,9 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                                     't1bo07c0' /* Custom Amount */,
                                   )
                                 ].toList(),
-                                onChanged: (val) => safeSetState(() {}),
+                                onChanged: (val) => safeSetState(() {
+                                  calculateTotal();
+                                }),
                                 controller:
                                     _model.radioButtonValueController ??=
                                         FormFieldController<String>(
@@ -526,6 +624,7 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                             autofocus: false,
                             enabled: _model.radioButtonValue == 'Custom Amount',
                             obscureText: false,
+                            onChanged: (value) => calculateTotal(),
                             decoration: InputDecoration(
                               labelText: FFLocalizations.of(context).getText(
                                 'a57lcew6' /* Enter custom tip amount */,
@@ -583,8 +682,18 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                                       .bodyMediumIsCustom,
                                 ),
                             keyboardType: TextInputType.number,
-                            validator: _model.textController4Validator
-                                .asValidator(context),
+                            validator: (value) {
+                              if (_model.radioButtonValue == 'Custom Amount') {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a custom tip amount';
+                                }
+                                double customAmount = double.tryParse(value) ?? 0.0;
+                                if (customAmount <= 2.5) {
+                                  return 'Custom tip must be greater than 2.5 JD';
+                                }
+                              }
+                              return null;
+                            },
                           ),
                         ].divide(SizedBox(height: 8.0)),
                       ),
@@ -594,17 +703,47 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        FFLocalizations.of(context).getText(
-                          'xity3slr' /* Extra Services */,
-                        ),
-                        style: FlutterFlowTheme.of(context).labelLarge.override(
-                              fontFamily:
-                                  FlutterFlowTheme.of(context).labelLargeFamily,
-                              letterSpacing: 0.0,
-                              useGoogleFonts: !FlutterFlowTheme.of(context)
-                                  .labelLargeIsCustom,
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Text(
+                            FFLocalizations.of(context).getText(
+                              'xity3slr' /* Extra Services */,
                             ),
+                            style: FlutterFlowTheme.of(context).labelLarge.override(
+                                  fontFamily:
+                                      FlutterFlowTheme.of(context).labelLargeFamily,
+                                  letterSpacing: 0.0,
+                                  useGoogleFonts: !FlutterFlowTheme.of(context)
+                                      .labelLargeIsCustom,
+                                ),
+                          ),
+                          Text(
+                            ' *',
+                            style: FlutterFlowTheme.of(context).labelLarge.override(
+                                  fontFamily:
+                                      FlutterFlowTheme.of(context).labelLargeFamily,
+                                  color: Colors.red,
+                                  letterSpacing: 0.0,
+                                  useGoogleFonts: !FlutterFlowTheme.of(context)
+                                      .labelLargeIsCustom,
+                                ),
+                          ),
+                          if (selectedServices.isEmpty)
+                            Expanded(
+                              child: Text(
+                                ' (Required - Please select at least one)',
+                                style: FlutterFlowTheme.of(context).labelSmall.override(
+                                      fontFamily:
+                                          FlutterFlowTheme.of(context).labelSmallFamily,
+                                      color: Colors.red,
+                                      letterSpacing: 0.0,
+                                      useGoogleFonts: !FlutterFlowTheme.of(context)
+                                          .labelSmallIsCustom,
+                                    ),
+                              ),
+                            ),
+                        ].divide(SizedBox(width: 4.0)),
                       ),
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -639,28 +778,35 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                                   final listViewServicecolRecord =
                                       listViewServicecolRecordList[
                                           listViewIndex];
-                                  return Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Container(
-                                        width: 20.0,
-                                        height: 20.0,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(4.0),
-                                          border: Border.all(
-                                            color: FlutterFlowTheme.of(context)
-                                                .primary,
-                                            width: 2.0,
+                                  return InkWell(
+                                    onTap: () => toggleService(listViewServicecolRecord.reference.id, listViewServicecolRecord.jd.toDouble()),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Container(
+                                          width: 20.0,
+                                          height: 20.0,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(4.0),
+                                            border: Border.all(
+                                              color: selectedServices.contains(listViewServicecolRecord.reference.id)
+                                                  ? FlutterFlowTheme.of(context).primary
+                                                  : FlutterFlowTheme.of(context).secondaryText,
+                                              width: 2.0,
+                                            ),
+                                            color: selectedServices.contains(listViewServicecolRecord.reference.id)
+                                                ? FlutterFlowTheme.of(context).primary
+                                                : Colors.transparent,
                                           ),
+                                          child: selectedServices.contains(listViewServicecolRecord.reference.id)
+                                              ? Icon(
+                                                  Icons.check,
+                                                  color: Colors.white,
+                                                  size: 12.0,
+                                                )
+                                              : null,
                                         ),
-                                        child: Icon(
-                                          Icons.check,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primary,
-                                          size: 12.0,
-                                        ),
-                                      ),
                                       Expanded(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -726,7 +872,8 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                                                       .bodyMediumIsCustom,
                                             ),
                                       ),
-                                    ].divide(SizedBox(width: 12.0)),
+                                      ].divide(SizedBox(width: 12.0)),
+                                    ),
                                   );
                                 },
                               );
@@ -761,7 +908,7 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                                 ),
                       ),
                       Text(
-                        '${FFAppState().totaljdamount.toString()} JD',
+                        '${totalAmount.toStringAsFixed(1)} JD',
                         style:
                             FlutterFlowTheme.of(context).titleMedium.override(
                                   fontFamily: FlutterFlowTheme.of(context)
@@ -776,9 +923,64 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                   ),
                   FFButtonWidget(
                     onPressed: () async {
+                      // Validate customer information
+                      if (_model.textController1?.text.isEmpty ?? true) {
+                        showSnackbar(
+                          context,
+                          'Please enter your name',
+                        );
+                        return; // Stop payment process
+                      }
+                      
+                      if (_model.textController2?.text.isEmpty ?? true) {
+                        showSnackbar(
+                          context,
+                          'Please enter your phone number',
+                        );
+                        return; // Stop payment process
+                      }
+                      
+                      if (_model.textController3?.text.isEmpty ?? true) {
+                        showSnackbar(
+                          context,
+                          'Please enter your email address',
+                        );
+                        return; // Stop payment process
+                      }
+                      
+                      // Validate that at least one service is selected
+                      if (selectedServices.isEmpty) {
+                        showSnackbar(
+                          context,
+                          'Please select at least one service before payment',
+                        );
+                        return; // Stop payment process
+                      }
+                      
+                      // Validate custom tip before proceeding to payment
+                      if (_model.radioButtonValue == 'Custom Amount') {
+                        String customTipText = _model.textController4.text;
+                        if (customTipText.isNotEmpty) {
+                          double customAmount = double.tryParse(customTipText) ?? 0.0;
+                          if (customAmount <= 2.5) {
+                            showSnackbar(
+                              context,
+                              'Custom tip must be greater than 2.5 JD',
+                            );
+                            return; // Stop payment process
+                          }
+                        } else {
+                          showSnackbar(
+                            context,
+                            'Please enter a custom tip amount',
+                          );
+                          return; // Stop payment process
+                        }
+                      }
+                      
                       final paymentResponse = await processStripePayment(
                         context,
-                        amount: FFAppState().tipFixedJD.toInt() * 100,
+                        amount: (totalAmount * 100).toInt(), // Convert JD to cents
                         currency: 'USD',
                         customerEmail: currentUserEmail,
                         customerName: currentUserDisplayName,
