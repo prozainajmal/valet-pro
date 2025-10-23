@@ -250,19 +250,19 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                                       .labelLargeIsCustom,
                                 ),
                           ),
-                          Expanded(
-                            child: Text(
-                              ' (All fields required)',
-                              style: FlutterFlowTheme.of(context).labelSmall.override(
-                                    fontFamily:
-                                        FlutterFlowTheme.of(context).labelSmallFamily,
-                                    color: Colors.red,
-                                    letterSpacing: 0.0,
-                                    useGoogleFonts: !FlutterFlowTheme.of(context)
-                                        .labelSmallIsCustom,
-                                  ),
-                            ),
-                          ),
+                          // Expanded(
+                          //   child: Text(
+                          //     ' (All fields required)',
+                          //     style: FlutterFlowTheme.of(context).labelSmall.override(
+                          //           fontFamily:
+                          //               FlutterFlowTheme.of(context).labelSmallFamily,
+                          //           color: Colors.red,
+                          //           letterSpacing: 0.0,
+                          //           useGoogleFonts: !FlutterFlowTheme.of(context)
+                          //               .labelSmallIsCustom,
+                          //         ),
+                          //   ),
+                          // ),
                         ].divide(SizedBox(width: 4.0)),
                       ),
                       Column(
@@ -703,47 +703,17 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Text(
-                            FFLocalizations.of(context).getText(
-                              'xity3slr' /* Extra Services */,
+                      Text(
+                        FFLocalizations.of(context).getText(
+                          'xity3slr' /* Extra Services */,
+                        ),
+                        style: FlutterFlowTheme.of(context).labelLarge.override(
+                              fontFamily:
+                                  FlutterFlowTheme.of(context).labelLargeFamily,
+                              letterSpacing: 0.0,
+                              useGoogleFonts: !FlutterFlowTheme.of(context)
+                                  .labelLargeIsCustom,
                             ),
-                            style: FlutterFlowTheme.of(context).labelLarge.override(
-                                  fontFamily:
-                                      FlutterFlowTheme.of(context).labelLargeFamily,
-                                  letterSpacing: 0.0,
-                                  useGoogleFonts: !FlutterFlowTheme.of(context)
-                                      .labelLargeIsCustom,
-                                ),
-                          ),
-                          Text(
-                            ' *',
-                            style: FlutterFlowTheme.of(context).labelLarge.override(
-                                  fontFamily:
-                                      FlutterFlowTheme.of(context).labelLargeFamily,
-                                  color: Colors.red,
-                                  letterSpacing: 0.0,
-                                  useGoogleFonts: !FlutterFlowTheme.of(context)
-                                      .labelLargeIsCustom,
-                                ),
-                          ),
-                          if (selectedServices.isEmpty)
-                            Expanded(
-                              child: Text(
-                                ' (Required - Please select at least one)',
-                                style: FlutterFlowTheme.of(context).labelSmall.override(
-                                      fontFamily:
-                                          FlutterFlowTheme.of(context).labelSmallFamily,
-                                      color: Colors.red,
-                                      letterSpacing: 0.0,
-                                      useGoogleFonts: !FlutterFlowTheme.of(context)
-                                          .labelSmallIsCustom,
-                                    ),
-                              ),
-                            ),
-                        ].divide(SizedBox(width: 4.0)),
                       ),
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -948,14 +918,6 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                         return; // Stop payment process
                       }
                       
-                      // Validate that at least one service is selected
-                      if (selectedServices.isEmpty) {
-                        showSnackbar(
-                          context,
-                          'Please select at least one service before payment',
-                        );
-                        return; // Stop payment process
-                      }
                       
                       // Validate custom tip before proceeding to payment
                       if (_model.radioButtonValue == 'Custom Amount') {

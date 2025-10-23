@@ -367,6 +367,10 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                           focusNode:
                                               _model.emailAddressFocusNode,
                                           obscureText: false,
+                                          onChanged: (value) {
+                                            _model.searchQuery = value;
+                                            safeSetState(() {});
+                                          },
                                           decoration: InputDecoration(
                                             labelText:
                                                 FFLocalizations.of(context)
@@ -458,6 +462,19 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                   FlutterFlowTheme.of(context)
                                                       .secondaryText,
                                             ),
+                                            suffixIcon: _model.searchQuery.isNotEmpty
+                                                ? IconButton(
+                                                    icon: Icon(
+                                                      Icons.clear,
+                                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                                    ),
+                                                    onPressed: () {
+                                                      _model.emailAddressTextController?.clear();
+                                                      _model.searchQuery = '';
+                                                      safeSetState(() {});
+                                                    },
+                                                  )
+                                                : null,
                                           ),
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
@@ -537,10 +554,46 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                   mainAxisSize: MainAxisSize.max,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          12.0, 12.0, 12.0, 0.0),
-                                      child: Row(
+                                    StreamBuilder<List<ValetAgentsRecord>>(
+                                      stream: queryValetAgentsRecord(
+                                        queryBuilder: (valetAgentsRecord) =>
+                                            valetAgentsRecord
+                                                .where(
+                                                  'assigned_company',
+                                                  isEqualTo:
+                                                      currentUserDocument
+                                                          ?.companyId,
+                                                )
+                                                .where(
+                                                  'status',
+                                                  isEqualTo: 'active',
+                                                ),
+                                        limit: 1,
+                                      ),
+                                      builder: (context, headerSnapshot) {
+                                        // Only show headers if there are agents
+                                        if (!headerSnapshot.hasData || headerSnapshot.data!.isEmpty) {
+                                          return SizedBox.shrink();
+                                        }
+                                        
+                                        // Also hide headers if searching and no results
+                                        if (_model.searchQuery.isNotEmpty && headerSnapshot.data!.isNotEmpty) {
+                                          // Check if any agents match the search
+                                          final hasSearchResults = headerSnapshot.data!.any((agent) {
+                                            final query = _model.searchQuery.toLowerCase();
+                                            return agent.name.toLowerCase().contains(query) ||
+                                                   agent.email.toLowerCase().contains(query) ||
+                                                   agent.phoneNumber.toLowerCase().contains(query);
+                                          });
+                                          if (!hasSearchResults) {
+                                            return SizedBox.shrink();
+                                          }
+                                        }
+                                        
+                                        return Padding(
+                                          padding: EdgeInsetsDirectional.fromSTEB(
+                                              12.0, 12.0, 12.0, 0.0),
+                                          child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         children: [
                                           Expanded(
@@ -726,6 +779,8 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                           ),
                                         ],
                                       ),
+                                        );
+                                      },
                                     ),
                                     Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
@@ -746,8 +801,8 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                       'status',
                                                       isEqualTo: 'active',
                                                     )
-                                                    .orderBy('created_time'),
-                                            limit: 10,
+                                                    .orderBy('created_time', descending: true),
+                                            limit: 50,
                                           ),
                                           builder: (context, snapshot) {
                                             // Customize what your widget looks like when it's loading.
@@ -773,23 +828,128 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                 listViewValetAgentsRecordList =
                                                 snapshot.data!;
 
+                                            // Apply search filter
+                                            List<ValetAgentsRecord> filteredList = listViewValetAgentsRecordList;
+                                            if (_model.searchQuery.isNotEmpty) {
+                                              filteredList = listViewValetAgentsRecordList.where((agent) {
+                                                final query = _model.searchQuery.toLowerCase();
+                                                return agent.name.toLowerCase().contains(query) ||
+                                                       agent.email.toLowerCase().contains(query) ||
+                                                       agent.phoneNumber.toLowerCase().contains(query);
+                                              }).toList();
+                                            }
+
+                                            // Check if filtered list is empty
+                                            if (filteredList.isEmpty) {
+                                              // Show different messages for no agents vs no search results
+                                              final isSearching = _model.searchQuery.isNotEmpty;
+                                              final hasAgents = listViewValetAgentsRecordList.isNotEmpty;
+                                              
+                                              return Container(
+                                                width: double.infinity,
+                                                padding: EdgeInsets.all(40.0),
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      isSearching ? Icons.search_off : Icons.people_outline,
+                                                      size: 80.0,
+                                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                                    ),
+                                                    SizedBox(height: 16.0),
+                                                    Text(
+                                                      isSearching ? 'No Results Found' : 'No Agents Yet',
+                                                      style: FlutterFlowTheme.of(context).headlineSmall.override(
+                                                        fontFamily: FlutterFlowTheme.of(context).headlineSmallFamily,
+                                                        letterSpacing: 0.0,
+                                                        useGoogleFonts: !FlutterFlowTheme.of(context).headlineSmallIsCustom,
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: 8.0),
+                                                    Text(
+                                                      isSearching 
+                                                          ? 'Try adjusting your search terms or clear the search to see all agents.'
+                                                          : 'Start by adding your first valet agent using the "Add Agent" button above.',
+                                                      textAlign: TextAlign.center,
+                                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                        fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
+                                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                                        letterSpacing: 0.0,
+                                                        useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+
                                             return ListView.builder(
                                               padding: EdgeInsets.zero,
                                               shrinkWrap: true,
                                               scrollDirection: Axis.vertical,
-                                              itemCount:
-                                                  listViewValetAgentsRecordList
-                                                      .length,
+                                              itemCount: filteredList.length,
                                               itemBuilder:
                                                   (context, listViewIndex) {
                                                 final listViewValetAgentsRecord =
-                                                    listViewValetAgentsRecordList[
-                                                        listViewIndex];
-                                                return Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          0.0, 0.0, 0.0, 2.0),
-                                                  child: Container(
+                                                    filteredList[listViewIndex];
+                                                return Dismissible(
+                                                  key: Key(listViewValetAgentsRecord.reference.id),
+                                                  direction: DismissDirection.endToStart,
+                                                  confirmDismiss: (direction) async {
+                                                    // Show confirmation dialog
+                                                    return await showDialog<bool>(
+                                                      context: context,
+                                                      builder: (BuildContext context) {
+                                                        return AlertDialog(
+                                                          title: Text('Delete Agent'),
+                                                          content: Text('Are you sure you want to delete ${listViewValetAgentsRecord.name}? This action cannot be undone.'),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () => Navigator.of(context).pop(false),
+                                                              child: Text('Cancel'),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () => Navigator.of(context).pop(true),
+                                                              style: TextButton.styleFrom(
+                                                                foregroundColor: Colors.red,
+                                                              ),
+                                                              child: Text('Delete'),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                  onDismissed: (direction) async {
+                                                    // Update agent status to inactive instead of deleting
+                                                    await listViewValetAgentsRecord.reference.update({
+                                                      'status': 'inactive',
+                                                      'is_active': false,
+                                                    });
+                                                    
+                                                    // Show success message
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text('Agent ${listViewValetAgentsRecord.name} has been removed'),
+                                                        backgroundColor: FlutterFlowTheme.of(context).secondary,
+                                                      ),
+                                                    );
+                                                  },
+                                                  background: Container(
+                                                    alignment: Alignment.centerRight,
+                                                    padding: EdgeInsets.only(right: 20.0),
+                                                    color: Colors.red,
+                                                    child: Icon(
+                                                      Icons.delete,
+                                                      color: Colors.white,
+                                                      size: 30.0,
+                                                    ),
+                                                  ),
+                                                  child: Padding(
+                                                    padding: EdgeInsetsDirectional
+                                                        .fromSTEB(
+                                                            0.0, 0.0, 0.0, 2.0),
+                                                    child: Container(
                                                     width: double.infinity,
                                                     decoration: BoxDecoration(
                                                       color: FlutterFlowTheme
@@ -843,7 +1003,9 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                                           Duration(
                                                                               milliseconds: 500),
                                                                       imageUrl:
-                                                                          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dXNlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+                                                                          listViewValetAgentsRecord.profilePhoto.isNotEmpty 
+                                                                              ? listViewValetAgentsRecord.profilePhoto
+                                                                              : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dXNlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
                                                                       width:
                                                                           40.0,
                                                                       height:
@@ -898,10 +1060,7 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                                             0.0),
                                                                         child:
                                                                             Text(
-                                                                          FFLocalizations.of(context)
-                                                                              .getText(
-                                                                            'hbvgee7f' /* user@domainname.com */,
-                                                                          ),
+                                                                          listViewValetAgentsRecord.email,
                                                                           style: FlutterFlowTheme.of(context)
                                                                               .bodyMedium
                                                                               .override(
@@ -1007,11 +1166,9 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                           ))
                                                             Expanded(
                                                               child: Text(
-                                                                FFLocalizations.of(
-                                                                        context)
-                                                                    .getText(
-                                                                  'cg7vidix' /* [Link] */,
-                                                                ),
+                                                                listViewValetAgentsRecord.qrCodeUrl.isNotEmpty 
+                                                                    ? 'QR Code' 
+                                                                    : 'No QR',
                                                                 style: FlutterFlowTheme.of(
                                                                         context)
                                                                     .bodyMedium
@@ -1096,7 +1253,7 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                                     child: Text(
                                                                       dateTimeFormat(
                                                                         "relative",
-                                                                        getCurrentTimestamp,
+                                                                        listViewValetAgentsRecord.createdTime!,
                                                                         locale:
                                                                             FFLocalizations.of(context).languageCode,
                                                                       ),
@@ -1120,6 +1277,7 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                       ),
                                                     ),
                                                   ),
+                                                ),
                                                 );
                                               },
                                             );

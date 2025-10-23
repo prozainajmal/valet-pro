@@ -730,7 +730,48 @@ class _AddAgentWidgetState extends State<AddAgentWidget>
                                   children: [
                                     FFButtonWidget(
                                       onPressed: () async {
-                                        await ValetAgentsRecord.collection
+                                        // Validate form fields
+                                        if (_model.agentNameTextController.text.isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Please enter the agent\'s full name'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        
+                                        if (_model.agentPhoneNumberTextController.text.isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Please enter the agent\'s mobile number'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        
+                                        if (_model.agentEmailAddressTextController.text.isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Please enter the agent\'s email address'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        
+                                        // Show loading indicator
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (context) => Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+                                        
+                                        try {
+                                          await ValetAgentsRecord.collection
                                             .doc()
                                             .set({
                                           ...createValetAgentsRecordData(
@@ -743,7 +784,7 @@ class _AddAgentWidgetState extends State<AddAgentWidget>
                                                 .agentEmailAddressTextController
                                                 .text,
                                             assignedCompany:
-                                                FFAppState().currentCompanyRef,
+                                                currentUserDocument?.companyId,
                                             status: 'active',
                                           ),
                                           ...mapToFirestore(
@@ -753,6 +794,10 @@ class _AddAgentWidgetState extends State<AddAgentWidget>
                                             },
                                           ),
                                         });
+                                        
+                                        // Close loading dialog
+                                        Navigator.of(context).pop();
+                                        
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
@@ -772,6 +817,24 @@ class _AddAgentWidgetState extends State<AddAgentWidget>
                                           ),
                                         );
                                         context.safePop();
+                                        } catch (e) {
+                                          // Close loading dialog
+                                          Navigator.of(context).pop();
+                                          
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Error adding agent: ${e.toString()}',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              duration: Duration(milliseconds: 4000),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
                                       },
                                       text: FFLocalizations.of(context).getText(
                                         '4f9zttlb' /* Add Valet Agent */,

@@ -15,8 +15,8 @@ final _isProd = false;
 
 // Stripe Credentials
 const _kProdStripePublishableKey = '';
-const _kTestStripePublishableKey = '';
-const _kAppleMerchantId = '';
+const _kTestStripePublishableKey = 'pk_live_51S3wasHXIgrcnNpS9pYZv6lJradPyX1EWndHnD3SQyKIYmwTCbp3hB7ZgFy9w8nDjfNCs6i2f7og4Ve29hCONX0300k1NZPRIJ';
+const _kAppleMerchantId = 'Testing';
 
 String stripePublishableKey() =>
     _isProd ? _kProdStripePublishableKey : _kTestStripePublishableKey;
