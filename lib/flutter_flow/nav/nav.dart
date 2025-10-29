@@ -83,13 +83,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
       errorBuilder: (context, state) =>
-          appStateNotifier.loggedIn ? NavBarPage() : CreateAccountWidget(),
+          appStateNotifier.loggedIn ? NavBarPage() : LoginWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
           builder: (context, _) =>
-              appStateNotifier.loggedIn ? NavBarPage() : CreateAccountWidget(),
+              appStateNotifier.loggedIn ? NavBarPage() : LoginWidget(),
           routes: [
             FFRoute(
               name: LoginWidget.routeName,
@@ -133,11 +133,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               builder: (context, params) => params.isEmpty
                   ? NavBarPage(initialPage: 'ValetAgents')
                   : ValetAgentsWidget(),
-            ),
-            FFRoute(
-              name: TransactionsWidget.routeName,
-              path: TransactionsWidget.routePath,
-              builder: (context, params) => TransactionsWidget(),
             ),
             FFRoute(
               name: SettingsWidget.routeName,
@@ -344,7 +339,7 @@ class FFRoute {
 
           if (requireAuth && !appStateNotifier.loggedIn) {
             appStateNotifier.setRedirectLocationIfUnset(state.uri.toString());
-            return '/createAccount';
+            return '/login';
           }
           return null;
         },
@@ -361,7 +356,7 @@ class FFRoute {
               ? Container(
                   color: Colors.transparent,
                   child: Image.asset(
-                    'assets/images/logo1.png',
+                    'assets/images/Untitled_design_(4).png',
                     fit: BoxFit.contain,
                   ),
                 )

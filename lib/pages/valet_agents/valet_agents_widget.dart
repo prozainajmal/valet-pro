@@ -1,4 +1,3 @@
-import '../../components/checkout_preview/checkout_preview_widget.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/add_agent/add_agent_widget.dart';
@@ -14,12 +13,9 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'valet_agents_model.dart';
 export 'valet_agents_model.dart';
 
@@ -371,10 +367,6 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                           focusNode:
                                               _model.emailAddressFocusNode,
                                           obscureText: false,
-                                          onChanged: (value) {
-                                            _model.searchQuery = value;
-                                            safeSetState(() {});
-                                          },
                                           decoration: InputDecoration(
                                             labelText:
                                                 FFLocalizations.of(context)
@@ -466,19 +458,6 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                   FlutterFlowTheme.of(context)
                                                       .secondaryText,
                                             ),
-                                            suffixIcon: _model.searchQuery.isNotEmpty
-                                                ? IconButton(
-                                                    icon: Icon(
-                                                      Icons.clear,
-                                                      color: FlutterFlowTheme.of(context).secondaryText,
-                                                    ),
-                                                    onPressed: () {
-                                                      _model.emailAddressTextController?.clear();
-                                                      _model.searchQuery = '';
-                                                      safeSetState(() {});
-                                                    },
-                                                  )
-                                                : null,
                                           ),
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
@@ -558,46 +537,10 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                   mainAxisSize: MainAxisSize.max,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    StreamBuilder<List<ValetAgentsRecord>>(
-                                      stream: queryValetAgentsRecord(
-                                        queryBuilder: (valetAgentsRecord) =>
-                                            valetAgentsRecord
-                                                .where(
-                                                  'assigned_company',
-                                                  isEqualTo:
-                                                      currentUserDocument
-                                                          ?.companyId,
-                                                )
-                                                .where(
-                                                  'status',
-                                                  isEqualTo: 'active',
-                                                ),
-                                        limit: 1,
-                                      ),
-                                      builder: (context, headerSnapshot) {
-                                        // Only show headers if there are agents
-                                        if (!headerSnapshot.hasData || headerSnapshot.data!.isEmpty) {
-                                          return SizedBox.shrink();
-                                        }
-                                        
-                                        // Also hide headers if searching and no results
-                                        if (_model.searchQuery.isNotEmpty && headerSnapshot.data!.isNotEmpty) {
-                                          // Check if any agents match the search
-                                          final hasSearchResults = headerSnapshot.data!.any((agent) {
-                                            final query = _model.searchQuery.toLowerCase();
-                                            return agent.name.toLowerCase().contains(query) ||
-                                                   agent.email.toLowerCase().contains(query) ||
-                                                   agent.phoneNumber.toLowerCase().contains(query);
-                                          });
-                                          if (!hasSearchResults) {
-                                            return SizedBox.shrink();
-                                          }
-                                        }
-                                        
-                                        return Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              12.0, 12.0, 12.0, 0.0),
-                                          child: Row(
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          12.0, 12.0, 12.0, 0.0),
+                                      child: Row(
                                         mainAxisSize: MainAxisSize.max,
                                         children: [
                                           Expanded(
@@ -783,8 +726,6 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                           ),
                                         ],
                                       ),
-                                        );
-                                      },
                                     ),
                                     Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
@@ -805,8 +746,8 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                       'status',
                                                       isEqualTo: 'active',
                                                     )
-                                                    .orderBy('created_time', descending: true),
-                                            limit: 50,
+                                                    .orderBy('created_time'),
+                                            limit: 10,
                                           ),
                                           builder: (context, snapshot) {
                                             // Customize what your widget looks like when it's loading.
@@ -832,128 +773,23 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                 listViewValetAgentsRecordList =
                                                 snapshot.data!;
 
-                                            // Apply search filter
-                                            List<ValetAgentsRecord> filteredList = listViewValetAgentsRecordList;
-                                            if (_model.searchQuery.isNotEmpty) {
-                                              filteredList = listViewValetAgentsRecordList.where((agent) {
-                                                final query = _model.searchQuery.toLowerCase();
-                                                return agent.name.toLowerCase().contains(query) ||
-                                                       agent.email.toLowerCase().contains(query) ||
-                                                       agent.phoneNumber.toLowerCase().contains(query);
-                                              }).toList();
-                                            }
-
-                                            // Check if filtered list is empty
-                                            if (filteredList.isEmpty) {
-                                              // Show different messages for no agents vs no search results
-                                              final isSearching = _model.searchQuery.isNotEmpty;
-                                              final hasAgents = listViewValetAgentsRecordList.isNotEmpty;
-                                              
-                                              return Container(
-                                                width: double.infinity,
-                                                padding: EdgeInsets.all(40.0),
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                      isSearching ? Icons.search_off : Icons.people_outline,
-                                                      size: 80.0,
-                                                      color: FlutterFlowTheme.of(context).secondaryText,
-                                                    ),
-                                                    SizedBox(height: 16.0),
-                                                    Text(
-                                                      isSearching ? 'No Results Found' : 'No Agents Yet',
-                                                      style: FlutterFlowTheme.of(context).headlineSmall.override(
-                                                        fontFamily: FlutterFlowTheme.of(context).headlineSmallFamily,
-                                                        letterSpacing: 0.0,
-                                                        useGoogleFonts: !FlutterFlowTheme.of(context).headlineSmallIsCustom,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 8.0),
-                                                    Text(
-                                                      isSearching 
-                                                          ? 'Try adjusting your search terms or clear the search to see all agents.'
-                                                          : 'Start by adding your first valet agent using the "Add Agent" button above.',
-                                                      textAlign: TextAlign.center,
-                                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                        fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
-                                                        color: FlutterFlowTheme.of(context).secondaryText,
-                                                        letterSpacing: 0.0,
-                                                        useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            }
-
                                             return ListView.builder(
                                               padding: EdgeInsets.zero,
                                               shrinkWrap: true,
                                               scrollDirection: Axis.vertical,
-                                              itemCount: filteredList.length,
+                                              itemCount:
+                                                  listViewValetAgentsRecordList
+                                                      .length,
                                               itemBuilder:
                                                   (context, listViewIndex) {
                                                 final listViewValetAgentsRecord =
-                                                    filteredList[listViewIndex];
-                                                return Dismissible(
-                                                  key: Key(listViewValetAgentsRecord.reference.id),
-                                                  direction: DismissDirection.endToStart,
-                                                  confirmDismiss: (direction) async {
-                                                    // Show confirmation dialog
-                                                    return await showDialog<bool>(
-                                                      context: context,
-                                                      builder: (BuildContext context) {
-                                                        return AlertDialog(
-                                                          title: Text('Delete Agent'),
-                                                          content: Text('Are you sure you want to delete ${listViewValetAgentsRecord.name}? This action cannot be undone.'),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () => Navigator.of(context).pop(false),
-                                                              child: Text('Cancel'),
-                                                            ),
-                                                            TextButton(
-                                                              onPressed: () => Navigator.of(context).pop(true),
-                                                              style: TextButton.styleFrom(
-                                                                foregroundColor: Colors.red,
-                                                              ),
-                                                              child: Text('Delete'),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  },
-                                                  onDismissed: (direction) async {
-                                                    // Update agent status to inactive instead of deleting
-                                                    await listViewValetAgentsRecord.reference.update({
-                                                      'status': 'inactive',
-                                                      'is_active': false,
-                                                    });
-                                                    
-                                                    // Show success message
-                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text('Agent ${listViewValetAgentsRecord.name} has been removed'),
-                                                        backgroundColor: FlutterFlowTheme.of(context).secondary,
-                                                      ),
-                                                    );
-                                                  },
-                                                  background: Container(
-                                                    alignment: Alignment.centerRight,
-                                                    padding: EdgeInsets.only(right: 20.0),
-                                                    color: Colors.red,
-                                                    child: Icon(
-                                                      Icons.delete,
-                                                      color: Colors.white,
-                                                      size: 30.0,
-                                                    ),
-                                                  ),
-                                                  child: Padding(
-                                                    padding: EdgeInsetsDirectional
-                                                        .fromSTEB(
-                                                            0.0, 0.0, 0.0, 2.0),
-                                                    child: Container(
+                                                    listViewValetAgentsRecordList[
+                                                        listViewIndex];
+                                                return Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                          0.0, 0.0, 0.0, 2.0),
+                                                  child: Container(
                                                     width: double.infinity,
                                                     decoration: BoxDecoration(
                                                       color: FlutterFlowTheme
@@ -1007,9 +843,7 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                                           Duration(
                                                                               milliseconds: 500),
                                                                       imageUrl:
-                                                                          listViewValetAgentsRecord.profilePhoto.isNotEmpty 
-                                                                              ? listViewValetAgentsRecord.profilePhoto
-                                                                              : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dXNlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+                                                                          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dXNlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
                                                                       width:
                                                                           40.0,
                                                                       height:
@@ -1064,7 +898,10 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                                             0.0),
                                                                         child:
                                                                             Text(
-                                                                          listViewValetAgentsRecord.email,
+                                                                          FFLocalizations.of(context)
+                                                                              .getText(
+                                                                            'hbvgee7f' /* user@domainname.com */,
+                                                                          ),
                                                                           style: FlutterFlowTheme.of(context)
                                                                               .bodyMedium
                                                                               .override(
@@ -1169,297 +1006,25 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                             tablet: false,
                                                           ))
                                                             Expanded(
-                                                              child: InkWell(
-                                                                onTap: listViewValetAgentsRecord.qrCodeUrl.isNotEmpty
-                                                                    ? () async {
-                                                                        // Show QR code in dialog
-                                                                        await showDialog(
-                                                                          context: context,
-                                                                          builder: (dialogContext) {
-                                                                            return Dialog(
-                                                                              backgroundColor: Colors.white,
-                                                                              shape: RoundedRectangleBorder(
-                                                                                borderRadius: BorderRadius.circular(16.0),
-                                                                              ),
-                                                                              child: Container(
-                                                                                padding: EdgeInsets.all(24.0),
-                                                                                child: Column(
-                                                                                  mainAxisSize: MainAxisSize.min,
-                                                                                  children: [
-                                                                                    Row(
-                                                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                      children: [
-                                                                                        Text(
-                                                                                          'QR Code - ${listViewValetAgentsRecord.name}',
-                                                                                          style: FlutterFlowTheme.of(context)
-                                                                                              .titleLarge
-                                                                                              .override(
-                                                                                                fontFamily: FlutterFlowTheme.of(context).titleLargeFamily,
-                                                                                                letterSpacing: 0.0,
-                                                                                                useGoogleFonts: !FlutterFlowTheme.of(context).titleLargeIsCustom,
-                                                                                              ),
-                                                                                        ),
-                                                                                        IconButton(
-                                                                                          icon: Icon(Icons.close),
-                                                                                          onPressed: () => Navigator.of(dialogContext).pop(),
-                                                                                        ),
-                                                                                      ],
-                                                                                    ),
-                                                                                    SizedBox(height: 24.0),
-                                                                                    // QR Code Image
-                                                                                    Container(
-                                                                                      width: 300.0,
-                                                                                      height: 300.0,
-                                                                                      decoration: BoxDecoration(
-                                                                                        color: Colors.white,
-                                                                                        borderRadius: BorderRadius.circular(12.0),
-                                                                                        border: Border.all(
-                                                                                          color: FlutterFlowTheme.of(context).lineColor,
-                                                                                          width: 2.0,
-                                                                                        ),
-                                                                                      ),
-                                                                                      child: Center(
-                                                                                        child: QrImageView(
-                                                                                          data: listViewValetAgentsRecord.qrCodeUrl,
-                                                                                          version: QrVersions.auto,
-                                                                                          size: 250.0,
-                                                                                          backgroundColor: Colors.white,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    SizedBox(height: 24.0),
-                                                                                    // Agent Info
-                                                                                    Container(
-                                                                                      padding: EdgeInsets.all(16.0),
-                                                                                      decoration: BoxDecoration(
-                                                                                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                                        borderRadius: BorderRadius.circular(8.0),
-                                                                                      ),
-                                                                                      child: Column(
-                                                                                        children: [
-                                                                                          Row(
-                                                                                            children: [
-                                                                                              Icon(Icons.person, size: 16.0, color: FlutterFlowTheme.of(context).secondaryText),
-                                                                                              SizedBox(width: 8.0),
-                                                                                              Text(
-                                                                                                listViewValetAgentsRecord.name,
-                                                                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                                  fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
-                                                                                                  letterSpacing: 0.0,
-                                                                                                  useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
-                                                                                                ),
-                                                                                              ),
-                                                                                            ],
-                                                                                          ),
-                                                                                          SizedBox(height: 8.0),
-                                                                                          Row(
-                                                                                            children: [
-                                                                                              Icon(Icons.email, size: 16.0, color: FlutterFlowTheme.of(context).secondaryText),
-                                                                                              SizedBox(width: 8.0),
-                                                                                              Text(
-                                                                                                listViewValetAgentsRecord.email,
-                                                                                                style: FlutterFlowTheme.of(context).bodySmall.override(
-                                                                                                  fontFamily: FlutterFlowTheme.of(context).bodySmallFamily,
-                                                                                                  letterSpacing: 0.0,
-                                                                                                  useGoogleFonts: !FlutterFlowTheme.of(context).bodySmallIsCustom,
-                                                                                                ),
-                                                                                              ),
-                                                                                            ],
-                                                                                          ),
-                                                                                          SizedBox(height: 8.0),
-                                                                                          Row(
-                                                                                            children: [
-                                                                                              Icon(Icons.phone, size: 16.0, color: FlutterFlowTheme.of(context).secondaryText),
-                                                                                              SizedBox(width: 8.0),
-                                                                                              Text(
-                                                                                                listViewValetAgentsRecord.phoneNumber,
-                                                                                                style: FlutterFlowTheme.of(context).bodySmall.override(
-                                                                                                  fontFamily: FlutterFlowTheme.of(context).bodySmallFamily,
-                                                                                                  letterSpacing: 0.0,
-                                                                                                  useGoogleFonts: !FlutterFlowTheme.of(context).bodySmallIsCustom,
-                                                                                                ),
-                                                                                              ),
-                                                                                            ],
-                                                                                          ),
-                                                                                        ],
-                                                                                      ),
-                                                                                    ),
-                                                                                    SizedBox(height: 24.0),
-                                                                                    // Action Buttons
-                                                                                    Column(
-                                                                                      children: [
-                                                                                        // Payment Button (Full Width)
-                                                                                        FFButtonWidget(
-                                                                                          onPressed: () async {
-                                                                                            // Close QR dialog first
-                                                                                            Navigator.of(dialogContext).pop();
-                                                                                            
-                                                                                            // Open checkout preview with agent data
-                                                                                            await showDialog(
-                                                                                              context: context,
-                                                                                              builder: (checkoutContext) {
-                                                                                                return Dialog(
-                                                                                                  elevation: 0,
-                                                                                                  insetPadding: EdgeInsets.zero,
-                                                                                                  backgroundColor: Colors.transparent,
-                                                                                                  alignment: AlignmentDirectional(0.0, 0.0)
-                                                                                                      .resolve(Directionality.of(context)),
-                                                                                                  child: GestureDetector(
-                                                                                                    onTap: () {
-                                                                                                      FocusScope.of(checkoutContext).unfocus();
-                                                                                                      FocusManager.instance.primaryFocus?.unfocus();
-                                                                                                    },
-                                                                                                    child: CheckoutPreviewWidget(
-                                                                                                      agentName: listViewValetAgentsRecord.name,
-                                                                                                      agentEmail: listViewValetAgentsRecord.email,
-                                                                                                      agentPhone: listViewValetAgentsRecord.phoneNumber,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                );
-                                                                                              },
-                                                                                            );
-                                                                                          },
-                                                                                          text: 'Make Payment',
-                                                                                          icon: Icon(
-                                                                                            Icons.payment,
-                                                                                            size: 20.0,
-                                                                                          ),
-                                                                                          options: FFButtonOptions(
-                                                                                            width: double.infinity,
-                                                                                            height: 48.0,
-                                                                                            padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                                                                                            iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                                                                            color: Color(0xFF4CAF50),
-                                                                                            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                                                                              fontFamily: FlutterFlowTheme.of(context).titleSmallFamily,
-                                                                                              color: Colors.white,
-                                                                                              letterSpacing: 0.0,
-                                                                                              useGoogleFonts: !FlutterFlowTheme.of(context).titleSmallIsCustom,
-                                                                                            ),
-                                                                                            elevation: 3.0,
-                                                                                            borderSide: BorderSide(
-                                                                                              color: Colors.transparent,
-                                                                                              width: 1.0,
-                                                                                            ),
-                                                                                            borderRadius: BorderRadius.circular(8.0),
-                                                                                          ),
-                                                                                        ),
-                                                                                        SizedBox(height: 12.0),
-                                                                                        // Copy Link & Share Buttons
-                                                                                        Row(
-                                                                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                                          children: [
-                                                                                            Expanded(
-                                                                                              child: FFButtonWidget(
-                                                                                                onPressed: () async {
-                                                                                                  // Copy QR code link to clipboard
-                                                                                                  await Clipboard.setData(
-                                                                                                    ClipboardData(text: listViewValetAgentsRecord.qrCodeUrl),
-                                                                                                  );
-                                                                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                                                                    SnackBar(
-                                                                                                      content: Text('QR Code link copied to clipboard!'),
-                                                                                                      backgroundColor: FlutterFlowTheme.of(context).secondary,
-                                                                                                      duration: Duration(seconds: 2),
-                                                                                                    ),
-                                                                                                  );
-                                                                                                },
-                                                                                                text: 'Copy Link',
-                                                                                                icon: Icon(
-                                                                                                  Icons.copy,
-                                                                                                  size: 16.0,
-                                                                                                ),
-                                                                                                options: FFButtonOptions(
-                                                                                                  height: 44.0,
-                                                                                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                                                                                                  iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                                                                                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                                                                                                  textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                                    fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
-                                                                                                    letterSpacing: 0.0,
-                                                                                                    useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
-                                                                                                  ),
-                                                                                                  elevation: 0.0,
-                                                                                                  borderSide: BorderSide(
-                                                                                                    color: FlutterFlowTheme.of(context).lineColor,
-                                                                                                    width: 1.0,
-                                                                                                  ),
-                                                                                                  borderRadius: BorderRadius.circular(8.0),
-                                                                                                ),
-                                                                                              ),
-                                                                                            ),
-                                                                                            SizedBox(width: 12.0),
-                                                                                            Expanded(
-                                                                                              child: FFButtonWidget(
-                                                                                                onPressed: () async {
-                                                                                                  // Share QR code link
-                                                                                                  await launchUrl(
-                                                                                                    Uri.parse(
-                                                                                                      'mailto:?subject=QR Code for ${listViewValetAgentsRecord.name}&body=Hi,%0A%0AHere is the QR code link for ${listViewValetAgentsRecord.name}:%0A%0A${listViewValetAgentsRecord.qrCodeUrl}%0A%0AAgent Details:%0AName: ${listViewValetAgentsRecord.name}%0AEmail: ${listViewValetAgentsRecord.email}%0APhone: ${listViewValetAgentsRecord.phoneNumber}',
-                                                                                                    ),
-                                                                                                  );
-                                                                                                },
-                                                                                                text: 'Share',
-                                                                                                icon: Icon(
-                                                                                                  Icons.share,
-                                                                                                  size: 16.0,
-                                                                                                ),
-                                                                                                options: FFButtonOptions(
-                                                                                                  height: 44.0,
-                                                                                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                                                                                                  iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                                                                                  color: FlutterFlowTheme.of(context).primary,
-                                                                                                  textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                                                                    fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
-                                                                                                    color: Colors.white,
-                                                                                                    letterSpacing: 0.0,
-                                                                                                    useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
-                                                                                                  ),
-                                                                                                  elevation: 2.0,
-                                                                                                  borderSide: BorderSide(
-                                                                                                    color: Colors.transparent,
-                                                                                                    width: 1.0,
-                                                                                                  ),
-                                                                                                  borderRadius: BorderRadius.circular(8.0),
-                                                                                                ),
-                                                                                              ),
-                                                                                            ),
-                                                                                          ],
-                                                                                        ),
-                                                                                      ],
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                              ),
-                                                                            );
-                                                                          },
-                                                                        );
-                                                                      }
-                                                                    : null,
-                                                                child: Text(
-                                                                  listViewValetAgentsRecord.qrCodeUrl.isNotEmpty
-                                                                      ? 'QR Code'
-                                                                      : 'No QR',
-                                                                  style: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .bodyMedium
-                                                                      .override(
-                                                                        fontFamily:
-                                                                            FlutterFlowTheme.of(context)
-                                                                                .bodyMediumFamily,
-                                                                        color: listViewValetAgentsRecord.qrCodeUrl.isNotEmpty
-                                                                            ? FlutterFlowTheme.of(context).primary
-                                                                            : FlutterFlowTheme.of(context).secondaryText,
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                        decoration: listViewValetAgentsRecord.qrCodeUrl.isNotEmpty
-                                                                            ? TextDecoration.underline
-                                                                            : TextDecoration.none,
-                                                                        useGoogleFonts:
-                                                                            !FlutterFlowTheme.of(context)
-                                                                                .bodyMediumIsCustom,
-                                                                      ),
+                                                              child: Text(
+                                                                FFLocalizations.of(
+                                                                        context)
+                                                                    .getText(
+                                                                  'cg7vidix' /* [Link] */,
                                                                 ),
+                                                                style: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .override(
+                                                                      fontFamily:
+                                                                          FlutterFlowTheme.of(context)
+                                                                              .bodyMediumFamily,
+                                                                      letterSpacing:
+                                                                          0.0,
+                                                                      useGoogleFonts:
+                                                                          !FlutterFlowTheme.of(context)
+                                                                              .bodyMediumIsCustom,
+                                                                    ),
                                                               ),
                                                             ),
                                                           if (responsiveVisibility(
@@ -1531,7 +1096,7 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                                     child: Text(
                                                                       dateTimeFormat(
                                                                         "relative",
-                                                                        listViewValetAgentsRecord.createdTime!,
+                                                                        getCurrentTimestamp,
                                                                         locale:
                                                                             FFLocalizations.of(context).languageCode,
                                                                       ),
@@ -1555,7 +1120,6 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                       ),
                                                     ),
                                                   ),
-                                                ),
                                                 );
                                               },
                                             );

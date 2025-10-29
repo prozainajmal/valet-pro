@@ -17,4 +17,3 @@ export '/pages/project_details/project_details_widget.dart'
     show ProjectDetailsWidget;
 export '/pages/checkout_management/checkout_management_widget.dart'
     show CheckoutManagementWidget;
-export '/pages/transactions/transactions_widget.dart' show TransactionsWidget;

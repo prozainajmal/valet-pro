@@ -381,7 +381,7 @@ class _LoginWidgetState extends State<LoginWidget>
                                 if (Theme.of(context).brightness ==
                                     Brightness.light)
                                   Image.asset(
-                                    'assets/images/logo_newforceLight_alt@3x.png',
+                                    'assets/images/Headline_Large_(Logo)_(2).png',
                                     width: 170.0,
                                     height: 60.0,
                                     fit: BoxFit.fitWidth,
@@ -389,9 +389,9 @@ class _LoginWidgetState extends State<LoginWidget>
                                 if (Theme.of(context).brightness ==
                                     Brightness.dark)
                                   Image.asset(
-                                    'assets/images/logo_newforceDark_alt@3x.png',
-                                    width: 170.0,
-                                    height: 60.0,
+                                    'assets/images/Headline_Large_(Logo)_(500_x_125_px)_(1).png',
+                                    width: 490.0,
+                                    height: 92.5,
                                     fit: BoxFit.fitWidth,
                                   ),
                               ],

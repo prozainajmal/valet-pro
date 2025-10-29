@@ -15,9 +15,9 @@ final _isProd = false;
 
 // Stripe Credentials
 const _kProdStripePublishableKey = '';
-const _kTestStripePublishableKey = 'pk_test_51S3wbDQjtOZNS7GfKKpf1GFnyZlsybDUOyGCgscpwS7U87htq4tkl4JA5G4gLjugsndNtRe7kBH159M2MHDJ8DDI00cm6iqQBw';
-const _kAppleMerchantId = 'Eliteserv LTD sandbox';
-
+const _kTestStripePublishableKey =
+    'pk_test_51S3wbDQjtOZNS7GfKKpf1GFnyZlsybDUOyGCgscpwS7U87htq4tkl4JA5G4gLjugsndNtRe7kBH159M2MHDJ8DDI00cm6iqQBw';
+const _kAppleMerchantId = '';
 
 String stripePublishableKey() =>
     _isProd ? _kProdStripePublishableKey : _kTestStripePublishableKey;
@@ -91,10 +91,10 @@ Future<StripePaymentResponse> processStripePayment(
         paymentIntentClientSecret: response['paymentIntent'],
         customerEphemeralKeySecret: response['ephemeralKey'],
         customerId: response['customer'],
-        merchantDisplayName: '',
+        merchantDisplayName: '\'Eliteserv LTD sandbox',
         googlePay: allowGooglePay
             ? PaymentSheetGooglePay(
-                merchantCountryCode: '',
+                merchantCountryCode: 'US',
                 currencyCode: currency,
                 testEnv: !_isProd,
               )

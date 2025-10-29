@@ -225,7 +225,7 @@ class _ModalWelcomeWidgetState extends State<ModalWelcomeWidget>
                               if (Theme.of(context).brightness ==
                                   Brightness.light)
                                 Image.asset(
-                                  'assets/images/logo_newforceLight@3x.png',
+                                  'assets/images/Headline_Large_(Logo)_(2).png',
                                   width: 130.0,
                                   height: 40.0,
                                   fit: BoxFit.fitWidth,
@@ -233,7 +233,7 @@ class _ModalWelcomeWidgetState extends State<ModalWelcomeWidget>
                               if (Theme.of(context).brightness ==
                                   Brightness.dark)
                                 Image.asset(
-                                  'assets/images/logo_newforceDark@3x.png',
+                                  'assets/images/Headline_Large_(Logo)_(500_x_125_px)_(3).png',
                                   width: 130.0,
                                   height: 40.0,
                                   fit: BoxFit.fitWidth,

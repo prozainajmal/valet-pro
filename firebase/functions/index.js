@@ -6,7 +6,8 @@ const stripeModule = require("stripe");
 
 // Credentials
 const kStripeProdSecretKey = "";
-const kStripeTestSecretKey = "sk_test_51S3wbDQjtOZNS7GfzNgCvpYImXW109gps6ZFLPEP1YRB1Snvvck6Xbqh7K1l08IrcAA1NlfcmkAvFIGap6jCAQrM006B0UIIaG";
+const kStripeTestSecretKey =
+  "sk_test_51S3wbDQjtOZNS7GfzNgCvpYImXW109gps6ZFLPEP1YRB1Snvvck6Xbqh7K1l08IrcAA1NlfcmkAvFIGap6jCAQrM006B0UIIaG";
 
 const secretKey = (isProd) =>
   isProd ? kStripeProdSecretKey : kStripeTestSecretKey;
