@@ -1,3 +1,4 @@
+import '../../components/checkout_preview/checkout_preview_widget.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/add_agent/add_agent_widget.dart';
@@ -13,9 +14,12 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'valet_agents_model.dart';
 export 'valet_agents_model.dart';
 
@@ -1165,23 +1169,297 @@ class _ValetAgentsWidgetState extends State<ValetAgentsWidget>
                                                             tablet: false,
                                                           ))
                                                             Expanded(
-                                                              child: Text(
-                                                                listViewValetAgentsRecord.qrCodeUrl.isNotEmpty 
-                                                                    ? 'QR Code' 
-                                                                    : 'No QR',
-                                                                style: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium
-                                                                    .override(
-                                                                      fontFamily:
-                                                                          FlutterFlowTheme.of(context)
-                                                                              .bodyMediumFamily,
-                                                                      letterSpacing:
-                                                                          0.0,
-                                                                      useGoogleFonts:
-                                                                          !FlutterFlowTheme.of(context)
-                                                                              .bodyMediumIsCustom,
-                                                                    ),
+                                                              child: InkWell(
+                                                                onTap: listViewValetAgentsRecord.qrCodeUrl.isNotEmpty
+                                                                    ? () async {
+                                                                        // Show QR code in dialog
+                                                                        await showDialog(
+                                                                          context: context,
+                                                                          builder: (dialogContext) {
+                                                                            return Dialog(
+                                                                              backgroundColor: Colors.white,
+                                                                              shape: RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.circular(16.0),
+                                                                              ),
+                                                                              child: Container(
+                                                                                padding: EdgeInsets.all(24.0),
+                                                                                child: Column(
+                                                                                  mainAxisSize: MainAxisSize.min,
+                                                                                  children: [
+                                                                                    Row(
+                                                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'QR Code - ${listViewValetAgentsRecord.name}',
+                                                                                          style: FlutterFlowTheme.of(context)
+                                                                                              .titleLarge
+                                                                                              .override(
+                                                                                                fontFamily: FlutterFlowTheme.of(context).titleLargeFamily,
+                                                                                                letterSpacing: 0.0,
+                                                                                                useGoogleFonts: !FlutterFlowTheme.of(context).titleLargeIsCustom,
+                                                                                              ),
+                                                                                        ),
+                                                                                        IconButton(
+                                                                                          icon: Icon(Icons.close),
+                                                                                          onPressed: () => Navigator.of(dialogContext).pop(),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                    SizedBox(height: 24.0),
+                                                                                    // QR Code Image
+                                                                                    Container(
+                                                                                      width: 300.0,
+                                                                                      height: 300.0,
+                                                                                      decoration: BoxDecoration(
+                                                                                        color: Colors.white,
+                                                                                        borderRadius: BorderRadius.circular(12.0),
+                                                                                        border: Border.all(
+                                                                                          color: FlutterFlowTheme.of(context).lineColor,
+                                                                                          width: 2.0,
+                                                                                        ),
+                                                                                      ),
+                                                                                      child: Center(
+                                                                                        child: QrImageView(
+                                                                                          data: listViewValetAgentsRecord.qrCodeUrl,
+                                                                                          version: QrVersions.auto,
+                                                                                          size: 250.0,
+                                                                                          backgroundColor: Colors.white,
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                    SizedBox(height: 24.0),
+                                                                                    // Agent Info
+                                                                                    Container(
+                                                                                      padding: EdgeInsets.all(16.0),
+                                                                                      decoration: BoxDecoration(
+                                                                                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                        borderRadius: BorderRadius.circular(8.0),
+                                                                                      ),
+                                                                                      child: Column(
+                                                                                        children: [
+                                                                                          Row(
+                                                                                            children: [
+                                                                                              Icon(Icons.person, size: 16.0, color: FlutterFlowTheme.of(context).secondaryText),
+                                                                                              SizedBox(width: 8.0),
+                                                                                              Text(
+                                                                                                listViewValetAgentsRecord.name,
+                                                                                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                                  fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
+                                                                                                  letterSpacing: 0.0,
+                                                                                                  useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                          SizedBox(height: 8.0),
+                                                                                          Row(
+                                                                                            children: [
+                                                                                              Icon(Icons.email, size: 16.0, color: FlutterFlowTheme.of(context).secondaryText),
+                                                                                              SizedBox(width: 8.0),
+                                                                                              Text(
+                                                                                                listViewValetAgentsRecord.email,
+                                                                                                style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                                                                  fontFamily: FlutterFlowTheme.of(context).bodySmallFamily,
+                                                                                                  letterSpacing: 0.0,
+                                                                                                  useGoogleFonts: !FlutterFlowTheme.of(context).bodySmallIsCustom,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                          SizedBox(height: 8.0),
+                                                                                          Row(
+                                                                                            children: [
+                                                                                              Icon(Icons.phone, size: 16.0, color: FlutterFlowTheme.of(context).secondaryText),
+                                                                                              SizedBox(width: 8.0),
+                                                                                              Text(
+                                                                                                listViewValetAgentsRecord.phoneNumber,
+                                                                                                style: FlutterFlowTheme.of(context).bodySmall.override(
+                                                                                                  fontFamily: FlutterFlowTheme.of(context).bodySmallFamily,
+                                                                                                  letterSpacing: 0.0,
+                                                                                                  useGoogleFonts: !FlutterFlowTheme.of(context).bodySmallIsCustom,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
+                                                                                    ),
+                                                                                    SizedBox(height: 24.0),
+                                                                                    // Action Buttons
+                                                                                    Column(
+                                                                                      children: [
+                                                                                        // Payment Button (Full Width)
+                                                                                        FFButtonWidget(
+                                                                                          onPressed: () async {
+                                                                                            // Close QR dialog first
+                                                                                            Navigator.of(dialogContext).pop();
+                                                                                            
+                                                                                            // Open checkout preview with agent data
+                                                                                            await showDialog(
+                                                                                              context: context,
+                                                                                              builder: (checkoutContext) {
+                                                                                                return Dialog(
+                                                                                                  elevation: 0,
+                                                                                                  insetPadding: EdgeInsets.zero,
+                                                                                                  backgroundColor: Colors.transparent,
+                                                                                                  alignment: AlignmentDirectional(0.0, 0.0)
+                                                                                                      .resolve(Directionality.of(context)),
+                                                                                                  child: GestureDetector(
+                                                                                                    onTap: () {
+                                                                                                      FocusScope.of(checkoutContext).unfocus();
+                                                                                                      FocusManager.instance.primaryFocus?.unfocus();
+                                                                                                    },
+                                                                                                    child: CheckoutPreviewWidget(
+                                                                                                      agentName: listViewValetAgentsRecord.name,
+                                                                                                      agentEmail: listViewValetAgentsRecord.email,
+                                                                                                      agentPhone: listViewValetAgentsRecord.phoneNumber,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                );
+                                                                                              },
+                                                                                            );
+                                                                                          },
+                                                                                          text: 'Make Payment',
+                                                                                          icon: Icon(
+                                                                                            Icons.payment,
+                                                                                            size: 20.0,
+                                                                                          ),
+                                                                                          options: FFButtonOptions(
+                                                                                            width: double.infinity,
+                                                                                            height: 48.0,
+                                                                                            padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                                                                            iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                                                                            color: Color(0xFF4CAF50),
+                                                                                            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                                                                              fontFamily: FlutterFlowTheme.of(context).titleSmallFamily,
+                                                                                              color: Colors.white,
+                                                                                              letterSpacing: 0.0,
+                                                                                              useGoogleFonts: !FlutterFlowTheme.of(context).titleSmallIsCustom,
+                                                                                            ),
+                                                                                            elevation: 3.0,
+                                                                                            borderSide: BorderSide(
+                                                                                              color: Colors.transparent,
+                                                                                              width: 1.0,
+                                                                                            ),
+                                                                                            borderRadius: BorderRadius.circular(8.0),
+                                                                                          ),
+                                                                                        ),
+                                                                                        SizedBox(height: 12.0),
+                                                                                        // Copy Link & Share Buttons
+                                                                                        Row(
+                                                                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                                          children: [
+                                                                                            Expanded(
+                                                                                              child: FFButtonWidget(
+                                                                                                onPressed: () async {
+                                                                                                  // Copy QR code link to clipboard
+                                                                                                  await Clipboard.setData(
+                                                                                                    ClipboardData(text: listViewValetAgentsRecord.qrCodeUrl),
+                                                                                                  );
+                                                                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                                                                    SnackBar(
+                                                                                                      content: Text('QR Code link copied to clipboard!'),
+                                                                                                      backgroundColor: FlutterFlowTheme.of(context).secondary,
+                                                                                                      duration: Duration(seconds: 2),
+                                                                                                    ),
+                                                                                                  );
+                                                                                                },
+                                                                                                text: 'Copy Link',
+                                                                                                icon: Icon(
+                                                                                                  Icons.copy,
+                                                                                                  size: 16.0,
+                                                                                                ),
+                                                                                                options: FFButtonOptions(
+                                                                                                  height: 44.0,
+                                                                                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                                                                                  iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                                                                                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                                                                                                  textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                                    fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
+                                                                                                    letterSpacing: 0.0,
+                                                                                                    useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
+                                                                                                  ),
+                                                                                                  elevation: 0.0,
+                                                                                                  borderSide: BorderSide(
+                                                                                                    color: FlutterFlowTheme.of(context).lineColor,
+                                                                                                    width: 1.0,
+                                                                                                  ),
+                                                                                                  borderRadius: BorderRadius.circular(8.0),
+                                                                                                ),
+                                                                                              ),
+                                                                                            ),
+                                                                                            SizedBox(width: 12.0),
+                                                                                            Expanded(
+                                                                                              child: FFButtonWidget(
+                                                                                                onPressed: () async {
+                                                                                                  // Share QR code link
+                                                                                                  await launchUrl(
+                                                                                                    Uri.parse(
+                                                                                                      'mailto:?subject=QR Code for ${listViewValetAgentsRecord.name}&body=Hi,%0A%0AHere is the QR code link for ${listViewValetAgentsRecord.name}:%0A%0A${listViewValetAgentsRecord.qrCodeUrl}%0A%0AAgent Details:%0AName: ${listViewValetAgentsRecord.name}%0AEmail: ${listViewValetAgentsRecord.email}%0APhone: ${listViewValetAgentsRecord.phoneNumber}',
+                                                                                                    ),
+                                                                                                  );
+                                                                                                },
+                                                                                                text: 'Share',
+                                                                                                icon: Icon(
+                                                                                                  Icons.share,
+                                                                                                  size: 16.0,
+                                                                                                ),
+                                                                                                options: FFButtonOptions(
+                                                                                                  height: 44.0,
+                                                                                                  padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                                                                                  iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                                                                                  color: FlutterFlowTheme.of(context).primary,
+                                                                                                  textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                                    fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
+                                                                                                    color: Colors.white,
+                                                                                                    letterSpacing: 0.0,
+                                                                                                    useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
+                                                                                                  ),
+                                                                                                  elevation: 2.0,
+                                                                                                  borderSide: BorderSide(
+                                                                                                    color: Colors.transparent,
+                                                                                                    width: 1.0,
+                                                                                                  ),
+                                                                                                  borderRadius: BorderRadius.circular(8.0),
+                                                                                                ),
+                                                                                              ),
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                              ),
+                                                                            );
+                                                                          },
+                                                                        );
+                                                                      }
+                                                                    : null,
+                                                                child: Text(
+                                                                  listViewValetAgentsRecord.qrCodeUrl.isNotEmpty
+                                                                      ? 'QR Code'
+                                                                      : 'No QR',
+                                                                  style: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .override(
+                                                                        fontFamily:
+                                                                            FlutterFlowTheme.of(context)
+                                                                                .bodyMediumFamily,
+                                                                        color: listViewValetAgentsRecord.qrCodeUrl.isNotEmpty
+                                                                            ? FlutterFlowTheme.of(context).primary
+                                                                            : FlutterFlowTheme.of(context).secondaryText,
+                                                                        letterSpacing:
+                                                                            0.0,
+                                                                        decoration: listViewValetAgentsRecord.qrCodeUrl.isNotEmpty
+                                                                            ? TextDecoration.underline
+                                                                            : TextDecoration.none,
+                                                                        useGoogleFonts:
+                                                                            !FlutterFlowTheme.of(context)
+                                                                                .bodyMediumIsCustom,
+                                                                      ),
+                                                                ),
                                                               ),
                                                             ),
                                                           if (responsiveVisibility(

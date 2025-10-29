@@ -34,10 +34,16 @@ class CheckoutPreviewWidget extends StatefulWidget {
     super.key,
     this.bannerUrl,
     this.jdpriceadd,
+    this.agentName,
+    this.agentEmail,
+    this.agentPhone,
   });
 
   final String? bannerUrl;
   final List<int>? jdpriceadd;
+  final String? agentName;
+  final String? agentEmail;
+  final String? agentPhone;
 
   @override
   State<CheckoutPreviewWidget> createState() => _CheckoutPreviewWidgetState();
@@ -65,12 +71,24 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
 
     _model.textController1 ??= TextEditingController();
     _model.textFieldFocusNode1 ??= FocusNode();
+    // Pre-fill with agent name if provided
+    if (widget.agentName != null) {
+      _model.textController1.text = widget.agentName!;
+    }
 
     _model.textController2 ??= TextEditingController();
     _model.textFieldFocusNode2 ??= FocusNode();
+    // Pre-fill with agent phone if provided
+    if (widget.agentPhone != null) {
+      _model.textController2.text = widget.agentPhone!;
+    }
 
     _model.textController3 ??= TextEditingController();
     _model.textFieldFocusNode3 ??= FocusNode();
+    // Pre-fill with agent email if provided
+    if (widget.agentEmail != null) {
+      _model.textController3.text = widget.agentEmail!;
+    }
 
     _model.textController4 ??= TextEditingController();
     _model.textFieldFocusNode4 ??= FocusNode();
@@ -491,55 +509,84 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                           color: FlutterFlowTheme.of(context).secondaryText,
                           borderRadius: BorderRadius.circular(8.0),
                         ),
-                        child: StreamBuilder<List<UserBannerRecord>>(
-                          stream: queryUserBannerRecord(),
-                          builder: (context, snapshot) {
-                            // Customize what your widget looks like when it's loading.
-                            if (!snapshot.hasData) {
-                              return Center(
-                                child: SizedBox(
-                                  width: 50.0,
-                                  height: 50.0,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      FlutterFlowTheme.of(context).primary,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                            List<UserBannerRecord>
-                                listViewUserBannerRecordList = snapshot.data!;
-
-                            return ListView.separated(
-                              padding: EdgeInsets.symmetric(horizontal: 0.0),
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: listViewUserBannerRecordList.length,
-                              separatorBuilder: (_, __) => SizedBox(width: 0.0),
-                              itemBuilder: (context, listViewIndex) {
-                                final listViewUserBannerRecord =
-                                    listViewUserBannerRecordList[listViewIndex];
-                                return ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.network(
-                                    listViewUserBannerRecord.image,
-                                    width: 315.0,
-                                    height: 104.0,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            Image.asset(
-                                      'assets/images/error_image.png',
-                                      width: 315.0,
-                                      height: 104.0,
-                                      fit: BoxFit.cover,
+                        child: AuthUserStreamWidget(
+                          builder: (context) => StreamBuilder<List<BannersRecord>>(
+                            stream: queryBannersRecord(
+                              queryBuilder: (bannersRecord) => bannersRecord
+                                  .where(
+                                    'companyId',
+                                    isEqualTo: currentUserDocument?.companyId,
+                                  )
+                                  .where(
+                                    'isActive',
+                                    isEqualTo: true,
+                                  )
+                                  .orderBy('createdAt', descending: true),
+                              limit: 10,
+                            ),
+                            builder: (context, snapshot) {
+                              // Customize what your widget looks like when it's loading.
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: SizedBox(
+                                    width: 50.0,
+                                    height: 50.0,
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        FlutterFlowTheme.of(context).primary,
+                                      ),
                                     ),
                                   ),
                                 );
-                              },
-                            );
-                          },
+                              }
+                              List<BannersRecord>
+                                  listViewBannersRecordList = snapshot.data!;
+
+                              // Show placeholder if no banners
+                              if (listViewBannersRecordList.isEmpty) {
+                                return Center(
+                                  child: Text(
+                                    'No flash offers available',
+                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                      fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
+                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                      letterSpacing: 0.0,
+                                      useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return ListView.separated(
+                                padding: EdgeInsets.symmetric(horizontal: 0.0),
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: listViewBannersRecordList.length,
+                                separatorBuilder: (_, __) => SizedBox(width: 8.0),
+                                itemBuilder: (context, listViewIndex) {
+                                  final listViewBannersRecord =
+                                      listViewBannersRecordList[listViewIndex];
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
+                                      listViewBannersRecord.imagePath,
+                                      width: 315.0,
+                                      height: 104.0,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Image.asset(
+                                        'assets/images/error_image.png',
+                                        width: 315.0,
+                                        height: 104.0,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ].divide(SizedBox(height: 8.0)),
@@ -720,7 +767,17 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           StreamBuilder<List<ServicecolRecord>>(
-                            stream: queryServicecolRecord(),
+                            stream: queryServicecolRecord(
+                              queryBuilder: (servicecolRecord) => servicecolRecord
+                                  .where(
+                                    'uid',
+                                    isEqualTo: currentUserUid,
+                                  )
+                                  .where(
+                                    'active',
+                                    isEqualTo: true,
+                                  ),
+                            ),
                             builder: (context, snapshot) {
                               // Customize what your widget looks like when it's loading.
                               if (!snapshot.hasData) {
@@ -736,47 +793,84 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                                   ),
                                 );
                               }
+                              
+                              // Handle connection errors
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Text(
+                                      'Error loading services: ${snapshot.error}',
+                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
+                                        color: Colors.red,
+                                        letterSpacing: 0.0,
+                                        useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              
                               List<ServicecolRecord>
                                   listViewServicecolRecordList = snapshot.data!;
 
-                              return ListView.builder(
-                                padding: EdgeInsets.zero,
-                                shrinkWrap: true,
-                                scrollDirection: Axis.vertical,
-                                itemCount: listViewServicecolRecordList.length,
-                                itemBuilder: (context, listViewIndex) {
-                                  final listViewServicecolRecord =
-                                      listViewServicecolRecordList[
-                                          listViewIndex];
-                                  return InkWell(
-                                    onTap: () => toggleService(listViewServicecolRecord.reference.id, listViewServicecolRecord.jd.toDouble()),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Container(
-                                          width: 20.0,
-                                          height: 20.0,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(4.0),
-                                            border: Border.all(
+                              // Show placeholder if no services
+                              if (listViewServicecolRecordList.isEmpty) {
+                                return Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Text(
+                                      'No extra services available',
+                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        fontFamily: FlutterFlowTheme.of(context).bodyMediumFamily,
+                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                        letterSpacing: 0.0,
+                                        useGoogleFonts: !FlutterFlowTheme.of(context).bodyMediumIsCustom,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                                return ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: listViewServicecolRecordList.length,
+                                  itemBuilder: (context, listViewIndex) {
+                                    final listViewServicecolRecord =
+                                        listViewServicecolRecordList[
+                                            listViewIndex];
+                                    return InkWell(
+                                      onTap: () => toggleService(listViewServicecolRecord.reference.id, listViewServicecolRecord.jd.toDouble()),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Container(
+                                            width: 20.0,
+                                            height: 20.0,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                              border: Border.all(
+                                                color: selectedServices.contains(listViewServicecolRecord.reference.id)
+                                                    ? FlutterFlowTheme.of(context).primary
+                                                    : FlutterFlowTheme.of(context).secondaryText,
+                                                width: 2.0,
+                                              ),
                                               color: selectedServices.contains(listViewServicecolRecord.reference.id)
                                                   ? FlutterFlowTheme.of(context).primary
-                                                  : FlutterFlowTheme.of(context).secondaryText,
-                                              width: 2.0,
+                                                  : Colors.transparent,
                                             ),
-                                            color: selectedServices.contains(listViewServicecolRecord.reference.id)
-                                                ? FlutterFlowTheme.of(context).primary
-                                                : Colors.transparent,
+                                            child: selectedServices.contains(listViewServicecolRecord.reference.id)
+                                                ? Icon(
+                                                    Icons.check,
+                                                    color: Colors.white,
+                                                    size: 12.0,
+                                                  )
+                                                : null,
                                           ),
-                                          child: selectedServices.contains(listViewServicecolRecord.reference.id)
-                                              ? Icon(
-                                                  Icons.check,
-                                                  color: Colors.white,
-                                                  size: 12.0,
-                                                )
-                                              : null,
-                                        ),
                                       Expanded(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -952,13 +1046,47 @@ class _CheckoutPreviewWidgetState extends State<CheckoutPreviewWidget> {
                         buttonColor: FlutterFlowTheme.of(context).primary,
                         buttonTextColor: FlutterFlowTheme.of(context).secondary,
                       );
+                      
                       if (paymentResponse.paymentId == null &&
                           paymentResponse.errorMessage != null) {
                         showSnackbar(
                           context,
                           'Error: ${paymentResponse.errorMessage}',
                         );
+                      } else if (paymentResponse.paymentId != null) {
+                        // Payment successful - save transaction to Firebase
+                        await TransactionsRecord.collection.doc().set({
+                          ...createTransactionsRecordData(
+                            paymentId: paymentResponse.paymentId,
+                            amount: totalAmount,
+                            tipAmount: _model.radioButtonValue == '2.5 JD' ? baseAmount : double.tryParse(_model.textController4.text) ?? 0.0,
+                            currency: 'USD',
+                            customerName: _model.textController1.text,
+                            customerEmail: _model.textController3.text,
+                            customerPhone: _model.textController2.text,
+                            description: 'Valet service payment',
+                            paymentMethod: 'Stripe',
+                            status: 'completed',
+                            companyId: currentUserDocument?.companyId != null 
+                                ? FirebaseFirestore.instance.doc('/companies/${currentUserDocument!.companyId}')
+                                : null,
+                          ),
+                          ...mapToFirestore({
+                            'timestamp': FieldValue.serverTimestamp(),
+                            'services_list': selectedServices,
+                          }),
+                        });
+                        
+                        // Show success message
+                        showSnackbar(
+                          context,
+                          '🎉 Your transaction is successful! Payment ID: ${paymentResponse.paymentId}',
+                        );
+                        
+                        // Close the checkout dialog after successful payment
+                        context.safePop();
                       }
+                      
                       _model.paymentId = paymentResponse.paymentId ?? '';
 
                       safeSetState(() {});

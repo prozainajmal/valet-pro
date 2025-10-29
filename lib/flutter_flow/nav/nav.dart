@@ -135,6 +135,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                   : ValetAgentsWidget(),
             ),
             FFRoute(
+              name: TransactionsWidget.routeName,
+              path: TransactionsWidget.routePath,
+              builder: (context, params) => TransactionsWidget(),
+            ),
+            FFRoute(
               name: SettingsWidget.routeName,
               path: SettingsWidget.routePath,
               builder: (context, params) => params.isEmpty

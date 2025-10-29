@@ -15,8 +15,9 @@ final _isProd = false;
 
 // Stripe Credentials
 const _kProdStripePublishableKey = '';
-const _kTestStripePublishableKey = 'pk_live_51S3wasHXIgrcnNpS9pYZv6lJradPyX1EWndHnD3SQyKIYmwTCbp3hB7ZgFy9w8nDjfNCs6i2f7og4Ve29hCONX0300k1NZPRIJ';
-const _kAppleMerchantId = 'Testing';
+const _kTestStripePublishableKey = 'pk_test_51S3wbDQjtOZNS7GfKKpf1GFnyZlsybDUOyGCgscpwS7U87htq4tkl4JA5G4gLjugsndNtRe7kBH159M2MHDJ8DDI00cm6iqQBw';
+const _kAppleMerchantId = 'Eliteserv LTD sandbox';
+
 
 String stripePublishableKey() =>
     _isProd ? _kProdStripePublishableKey : _kTestStripePublishableKey;
@@ -100,7 +101,7 @@ Future<StripePaymentResponse> processStripePayment(
             : null,
         applePay: isiOS && allowApplePay
             ? PaymentSheetApplePay(
-                merchantCountryCode: '',
+                merchantCountryCode: 'US',
               )
             : null,
         style: themeStyle,

@@ -1251,6 +1251,56 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                                                 'textOnPageLoadAnimation1']!),
                                           ),
                                         ),
+                                        Padding(
+                                          padding: EdgeInsetsDirectional.fromSTEB(
+                                              16.0, 8.0, 16.0, 8.0),
+                                          child: InkWell(
+                                            onTap: () async {
+                                              context.pushNamed('Transactions');
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 16.0, vertical: 12.0),
+                                              decoration: BoxDecoration(
+                                                color: FlutterFlowTheme.of(context).primary,
+                                                borderRadius: BorderRadius.circular(8.0),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    blurRadius: 4.0,
+                                                    color: Color(0x33000000),
+                                                    offset: Offset(0.0, 2.0),
+                                                  )
+                                                ],
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.receipt_long,
+                                                    color: Colors.white,
+                                                    size: 20.0,
+                                                  ),
+                                                  SizedBox(width: 8.0),
+                                                  Text(
+                                                    'Transactions',
+                                                    style: FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .override(
+                                                          fontFamily:
+                                                              FlutterFlowTheme.of(context)
+                                                                  .titleSmallFamily,
+                                                          color: Colors.white,
+                                                          letterSpacing: 0.0,
+                                                          useGoogleFonts:
+                                                              !FlutterFlowTheme.of(context)
+                                                                  .titleSmallIsCustom,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
