@@ -121,20 +121,39 @@ class _CheckoutPage1WidgetState extends State<CheckoutPage1Widget> {
                               Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 4.0),
-                                child: Text(
-                                  FFLocalizations.of(context).getText(
-                                    'uwinh9eg' /* Service Name */,
-                                  ),
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: FlutterFlowTheme.of(context)
-                                            .bodyMediumFamily,
-                                        letterSpacing: 0.0,
-                                        useGoogleFonts:
-                                            !FlutterFlowTheme.of(context)
-                                                .bodyMediumIsCustom,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      FFLocalizations.of(context).getText(
+                                        'uwinh9eg' /* Service Name */,
                                       ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: FlutterFlowTheme.of(context)
+                                                .bodyMediumFamily,
+                                            letterSpacing: 0.0,
+                                            useGoogleFonts:
+                                                !FlutterFlowTheme.of(context)
+                                                    .bodyMediumIsCustom,
+                                          ),
+                                    ),
+                                    Text(
+                                      ' *',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: FlutterFlowTheme.of(context)
+                                                .bodyMediumFamily,
+                                            color: Colors.red,
+                                            letterSpacing: 0.0,
+                                            useGoogleFonts:
+                                                !FlutterFlowTheme.of(context)
+                                                    .bodyMediumIsCustom,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               TextFormField(
@@ -145,7 +164,7 @@ class _CheckoutPage1WidgetState extends State<CheckoutPage1Widget> {
                                 obscureText: false,
                                 decoration: InputDecoration(
                                   hintText: FFLocalizations.of(context).getText(
-                                    'k2xz3bmw' /* Enter service name */,
+                                    'k2xz3bmw' /* Enter service name   */,
                                   ),
                                   hintStyle: FlutterFlowTheme.of(context)
                                       .bodyLarge
@@ -213,20 +232,39 @@ class _CheckoutPage1WidgetState extends State<CheckoutPage1Widget> {
                               Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 4.0),
-                                child: Text(
-                                  FFLocalizations.of(context).getText(
-                                    'fumw4q9i' /* Price JD */,
-                                  ),
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: FlutterFlowTheme.of(context)
-                                            .bodyMediumFamily,
-                                        letterSpacing: 0.0,
-                                        useGoogleFonts:
-                                            !FlutterFlowTheme.of(context)
-                                                .bodyMediumIsCustom,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      FFLocalizations.of(context).getText(
+                                        'fumw4q9i' /* Price JD */,
                                       ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: FlutterFlowTheme.of(context)
+                                                .bodyMediumFamily,
+                                            letterSpacing: 0.0,
+                                            useGoogleFonts:
+                                                !FlutterFlowTheme.of(context)
+                                                    .bodyMediumIsCustom,
+                                          ),
+                                    ),
+                                    Text(
+                                      ' *',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: FlutterFlowTheme.of(context)
+                                                .bodyMediumFamily,
+                                            color: Colors.red,
+                                            letterSpacing: 0.0,
+                                            useGoogleFonts:
+                                                !FlutterFlowTheme.of(context)
+                                                    .bodyMediumIsCustom,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               TextFormField(
@@ -306,20 +344,39 @@ class _CheckoutPage1WidgetState extends State<CheckoutPage1Widget> {
                               Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 0.0, 4.0),
-                                child: Text(
-                                  FFLocalizations.of(context).getText(
-                                    '8rz0jkoz' /* Description */,
-                                  ),
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: FlutterFlowTheme.of(context)
-                                            .bodyMediumFamily,
-                                        letterSpacing: 0.0,
-                                        useGoogleFonts:
-                                            !FlutterFlowTheme.of(context)
-                                                .bodyMediumIsCustom,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      FFLocalizations.of(context).getText(
+                                        '8rz0jkoz' /* Description */,
                                       ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: FlutterFlowTheme.of(context)
+                                                .bodyMediumFamily,
+                                            letterSpacing: 0.0,
+                                            useGoogleFonts:
+                                                !FlutterFlowTheme.of(context)
+                                                    .bodyMediumIsCustom,
+                                          ),
+                                    ),
+                                    Text(
+                                      ' *',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: FlutterFlowTheme.of(context)
+                                                .bodyMediumFamily,
+                                            color: Colors.red,
+                                            letterSpacing: 0.0,
+                                            useGoogleFonts:
+                                                !FlutterFlowTheme.of(context)
+                                                    .bodyMediumIsCustom,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               TextFormField(
@@ -434,7 +491,59 @@ class _CheckoutPage1WidgetState extends State<CheckoutPage1Widget> {
                       ),
                       FFButtonWidget(
                         onPressed: () {
-                          print('Button pressed ...');
+                          // Validate service name
+                          if (_model.serviceNameTextController?.text.isEmpty ?? true) {
+                            showSnackbar(
+                              context,
+                              'Please enter a service name',
+                            );
+                            return;
+                          }
+                          
+                          // Validate service price
+                          if (_model.servicePrizeTextController?.text.isEmpty ?? true) {
+                            showSnackbar(
+                              context,
+                              'Please enter a service price',
+                            );
+                            return;
+                          }
+                          
+                          // Validate price is a valid number
+                          double? price = double.tryParse(_model.servicePrizeTextController!.text);
+                          if (price == null || price <= 0) {
+                            showSnackbar(
+                              context,
+                              'Please enter a valid price (greater than 0)',
+                            );
+                            return;
+                          }
+                          
+                          // Validate service description
+                          if (_model.serviceDescriptionTextController?.text.isEmpty ?? true) {
+                            showSnackbar(
+                              context,
+                              'Please enter a service description',
+                            );
+                            return;
+                          }
+                          
+                          // If all validations pass, proceed with adding the service
+                          showSnackbar(
+                            context,
+                            'Service added successfully!',
+                          );
+                          
+                          // Clear the form after successful submission
+                          _model.serviceNameTextController?.clear();
+                          _model.servicePrizeTextController?.clear();
+                          _model.serviceDescriptionTextController?.clear();
+                          
+                          // You can add your service creation logic here
+                          print('Service Name: ${_model.serviceNameTextController?.text}');
+                          print('Service Price: ${_model.servicePrizeTextController?.text}');
+                          print('Service Description: ${_model.serviceDescriptionTextController?.text}');
+                          print('Service Active: ${_model.serviceSwitchValue}');
                         },
                         text: FFLocalizations.of(context).getText(
                           't4dyzq3d' /* Add New Service */,

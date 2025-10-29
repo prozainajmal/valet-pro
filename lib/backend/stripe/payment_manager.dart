@@ -15,8 +15,9 @@ final _isProd = false;
 
 // Stripe Credentials
 const _kProdStripePublishableKey = '';
-const _kTestStripePublishableKey = '';
-const _kAppleMerchantId = '';
+const _kTestStripePublishableKey = 'pk_test_51S3wbDQjtOZNS7GfKKpf1GFnyZlsybDUOyGCgscpwS7U87htq4tkl4JA5G4gLjugsndNtRe7kBH159M2MHDJ8DDI00cm6iqQBw';
+const _kAppleMerchantId = 'Eliteserv LTD sandbox';
+
 
 String stripePublishableKey() =>
     _isProd ? _kProdStripePublishableKey : _kTestStripePublishableKey;
@@ -100,7 +101,7 @@ Future<StripePaymentResponse> processStripePayment(
             : null,
         applePay: isiOS && allowApplePay
             ? PaymentSheetApplePay(
-                merchantCountryCode: '',
+                merchantCountryCode: 'US',
               )
             : null,
         style: themeStyle,

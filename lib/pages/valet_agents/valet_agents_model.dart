@@ -27,6 +27,13 @@ class ValetAgentsModel extends FlutterFlowModel<ValetAgentsWidget> {
   FocusNode? emailAddressFocusNode;
   TextEditingController? emailAddressTextController;
   String? Function(BuildContext, String?)? emailAddressTextControllerValidator;
+  
+  // Search functionality
+  String _searchQuery = '';
+  String get searchQuery => _searchQuery;
+  set searchQuery(String value) {
+    _searchQuery = value;
+  }
 
   @override
   void initState(BuildContext context) {

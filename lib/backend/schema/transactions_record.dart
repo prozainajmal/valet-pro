@@ -98,6 +98,36 @@ class TransactionsRecord extends FirestoreRecord {
   String get status => _status ?? '';
   bool hasStatus() => _status != null;
 
+  // "payment_id" field.
+  String? _paymentId;
+  String get paymentId => _paymentId ?? '';
+  bool hasPaymentId() => _paymentId != null;
+
+  // "customer_name" field.
+  String? _customerName;
+  String get customerName => _customerName ?? '';
+  bool hasCustomerName() => _customerName != null;
+
+  // "customer_email" field.
+  String? _customerEmail;
+  String get customerEmail => _customerEmail ?? '';
+  bool hasCustomerEmail() => _customerEmail != null;
+
+  // "customer_phone" field.
+  String? _customerPhone;
+  String get customerPhone => _customerPhone ?? '';
+  bool hasCustomerPhone() => _customerPhone != null;
+
+  // "description" field.
+  String? _description;
+  String get description => _description ?? '';
+  bool hasDescription() => _description != null;
+
+  // "services_list" field.
+  List<String>? _servicesList;
+  List<String> get servicesList => _servicesList ?? const [];
+  bool hasServicesList() => _servicesList != null;
+
   void _initializeFields() {
     _agentId = snapshotData['agent_id'] as DocumentReference?;
     _amount = castToType<double>(snapshotData['amount']);
@@ -115,6 +145,12 @@ class TransactionsRecord extends FirestoreRecord {
     _payoutStatus = snapshotData['payout_status'] as String?;
     _paidAt = snapshotData['paid_at'] as DateTime?;
     _status = snapshotData['status'] as String?;
+    _paymentId = snapshotData['payment_id'] as String?;
+    _customerName = snapshotData['customer_name'] as String?;
+    _customerEmail = snapshotData['customer_email'] as String?;
+    _customerPhone = snapshotData['customer_phone'] as String?;
+    _description = snapshotData['description'] as String?;
+    _servicesList = getDataList(snapshotData['services_list']);
   }
 
   static CollectionReference get collection =>
@@ -168,6 +204,11 @@ Map<String, dynamic> createTransactionsRecordData({
   String? payoutStatus,
   DateTime? paidAt,
   String? status,
+  String? paymentId,
+  String? customerName,
+  String? customerEmail,
+  String? customerPhone,
+  String? description,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -187,6 +228,11 @@ Map<String, dynamic> createTransactionsRecordData({
       'payout_status': payoutStatus,
       'paid_at': paidAt,
       'status': status,
+      'payment_id': paymentId,
+      'customer_name': customerName,
+      'customer_email': customerEmail,
+      'customer_phone': customerPhone,
+      'description': description,
     }.withoutNulls,
   );
 
